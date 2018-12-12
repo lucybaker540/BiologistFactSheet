@@ -66,8 +66,8 @@ basicTable <- function(annualData){
 #rm(annualData);rm(tableData)
 
 # test your function!!!!
-basicTable(reed6yr)
-basicTable(reed2yr)
+#basicTable(reed6yr)
+#basicTable(reed2yr)
 
 
 
