@@ -3,3 +3,8 @@
 .RData
 .Ruserdata
 .Rproj
+*.Rproj
+*.accdb
+factSheet/
+*.doc
+*.docx
