@@ -1,0 +1,23 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1544624840564.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "2040620475",
+    "id" : "386BB0A9",
+    "lastKnownWriteTime" : 1544624862,
+    "last_content_update" : 1544624862816,
+    "path" : "C:/Backup/GitHub/BiologistFactSheet/functionStart.R",
+    "project_path" : "functionStart.R",
+    "properties" : {
+        "cursorPosition" : "0,1",
+        "scrollLine" : "0",
+        "tempName" : "Untitled1"
+    },
+    "relative_order" : 1,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_source"
+}
