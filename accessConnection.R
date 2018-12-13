@@ -25,15 +25,16 @@ totHabCon <- sqlQuery(channel,'SELECT * FROM HabSamps')
 
 #Function to filter by 1 station and range of years
 
-selectStation<-function(UserStation, startyear, endyear){
-  station<- filter(SCIquery,StationID==UserStation)
-  subset(station, Year>= as.integer(startyear) & Year<= as.integer(endyear))
-  
-}
-
 UserStation<-"1ACUB004.63"
 startyear<- as.integer(2008)
 endyear<- as.integer(2014)
+
+selectStation<-function(UserStation, startyear, endyear){
+  station<- filter(SCIquery,StationID==UserStation)
+  subset(station, Year>= as.integer(startyear) & Year<= as.integer(endyear))
+  }
+
+
 df<-selectStation(UserStation, startyear, endyear)
 
 
