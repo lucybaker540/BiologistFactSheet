@@ -1,5 +1,5 @@
 ---
-title: "Virginia Department of Environmental Quality Biological Monitoring Program"
+title: "Virginia Department of Environmental Quality Biological Monitoring Program: Benthic Assessment Factsheet"
 output:
   word_document: default
   pdf_document: default
@@ -8,28 +8,106 @@ output:
 always_allow_html: yes
 ---
 
-```{r setup, include=FALSE}
+```{r setup, include=FALSE, message=FALSE}
 knitr::opts_chunk$set(echo = FALSE)
 
 library(tidyverse)
 library(readxl)
 library(DT)
+library(RODBC)
+library(dplyr)
+library(ggplot2)
+library(scales)
+
 ```
 
-```{r read in data}
+```{r read in data, message=FALSE}
 
 # Read in data and functions
-source('functionStart.R')
+
+
+source('accessConnection.R')
+
+#User enter data
+
+UserStation<-"4ASRE022.30"
+startyear<- 2008
+endyear<- 2014
+
+
+
+annualdata<-selectStation(UserStation, startyear, endyear)
+StationQRY<-stationqry(UserStation)
+
+#Habitat data manipulation
+hab<-selecthabitatStation(UserStation, startyear, endyear)
+
+totHab <- hab %>%
+  group_by(StationID, CollDate ) %>%
+  mutate(TotalHabitat = sum(HabValue))
+
+
+
 ```
 
 
-##### Regional Office: `r unique(reed2yr$DEQREG)`
-##### River Basin: `r unique(substr(reed2yr$StationID, start = 1, stop = 2))`
-##### Stream Name: `r unique(reed2yr$StreamName)`
-##### Location INformation: `r unique(reed2yr$StationID)`
+**Regional Office:** &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; `r unique(StationQRY$DEQREG)`
 
-### Biological Assessments for the Last Two Years
-```{r table}
-basicTable(reed2yr)
+**River Basin:** &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; `r unique(StationQRY$Basin)`
+
+**Stream Name:** &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`r unique(StationQRY$StreamName)`
+
+**Location Information:** &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`r unique(StationQRY$Location)`
+
+**Station ID:** &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`r unique(annualdata$StationID)`
+
+
+
+
+
+
+#### Biological Assessments for the Last Two Years
+```{r table, message=FALSE}
+basicTable(annualdata)
 ```
+
+#### VSCI Scores
+```{r graph}
+
+bugplot(annualdata)
+
+```
+
+
+**Are there any seasonal differences noted?**
+
+Biologist Enters information
+
+
+
+**Summary of any comments associated with assessments**
+
+Biologist Enters information
+
+
+**Any factors observed in watershed that may be affecting the benthic community?**
+
+Biologist Enters information
+
+
+**Have there been any recent changes in activity in the watershed that may have affected the more recent bioassessments.  Are these changes likely to affect the benthic community for a short or long term basis?**
+
+Biologist Enters information
+
+
+
+#### Total Habitat Scores
+
+```{r habitat table}
+
+HabitatDT(totHab)
+```
+
+
+**Final Assessment Rating:**
 
