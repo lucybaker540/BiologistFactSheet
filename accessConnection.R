@@ -38,7 +38,7 @@ endyear<- 2014
 stationqry<- function(UserStation){
   filter(Stationsquery,StationID==UserStation)
 }
-StationQRY<-stationqry(UserStation)
+#StationQRY<-stationqry(UserStation)
 
 #Function to filter by 1 station and range of years
 
@@ -52,7 +52,7 @@ selectStation<-function(UserStation, startyear, endyear){
   }
 
 
-annualdata<-selectStation(UserStation, startyear, endyear)
+#annualdata<-selectStation(UserStation, startyear, endyear)
 
 #Display impaired or non-impaired message
 
@@ -63,7 +63,7 @@ VSCItester <- function(VSCI){
   for (i in 1:length(VSCI)){
     
     if(is.na(VSCI[i])){
-      message1[i] <- 'not sampled'
+      message1[i] <- 'Not sampled'
     }else{
       if(VSCI[i] >= 60){message1[i] <- 'Not Impaired'}
       if(VSCI[i] < 60){message1[i] <- 'Impaired'}
@@ -79,19 +79,19 @@ basicTable <- function(annualdata){
   # grab info we want from input dataframe
   tableData <- select(annualdata, Year, Season, IBI) %>%
     spread(Season, IBI)%>%
-    mutate(Fall = format(Fall, digits=3),
+    mutate(Fall = as.numeric(format(Fall, digits=3)),
            `Fall Assessment` = VSCItester(Fall),
-           Spring = format(Spring, digits=3),
+           Spring = as.numeric(format(Spring, digits=3)),
            `Spring Assessment` = VSCItester(Spring)) %>%
     select(Year, Fall, `Fall Assessment`, Spring, `Spring Assessment`)
   #make table the way we want
-  datatable(tableData, rownames=F, options = list(scrollY = '500px', pageLength= 10, dom = 't')) %>%
+  datatable(tableData, rownames=F, options = list(pageLength= nrow(tableData), dom = 't')) %>%
     formatStyle('Fall Assessment', textAlign = 'center') %>%
     formatStyle('Spring Assessment', textAlign = 'center')
   
 }
 
-basicTable(annualdata)
+#basicTable(annualdata)
 
 
 #Make a plot function to plot yearly VSCI scores- stole code from stressor report code, this won't plot data but I'm not sure why not! 
@@ -111,10 +111,10 @@ bugplot<-function(annualdata) {
 
 }
 
-bugplot(annualdata)
+#bugplot(annualdata)
 
 # Total hab mess around
-totalHabitat <- left_join(totalHab,totHabCon, by=c('HabSampID', 'Comments','EnterDate'))
+totalHabitat <- suppressWarnings(left_join(totalHab,totHabCon, by=c('HabSampID', 'Comments','EnterDate')))
 
 rm(totHabCon); rm(totalHab)
 # test manipulation zone
@@ -137,7 +137,7 @@ hab<-selecthabitatStation(UserStation, startyear, endyear)
 totHab <- hab %>%
   group_by(StationID, CollDate ) %>%
   mutate(TotalHabitat = sum(HabValue))
-totHab$CollDate <- as.Date(as.character(totHab$CollDate),format="%Y-%m-%d")
+#totHab$CollDate <- as.Date(as.character(totHab$CollDate),format="%Y-%m-%d")
 
 
 ####totHabWide <- select(totHab, StationID, CollDate, `Total Habitat`, HabParameter, HabValue) %>%
@@ -186,6 +186,10 @@ if("POOLSUB" %in% unique(totHab$HabParameter) | 'POOLVAR' %in% unique(totHab$Hab
     formatStyle(names(habData1)[3:12], textAlign = 'center', `font-family` = 'Arial') %>%
     formatStyle(names(habData1), fontWeight = styleInterval(10, c('bold','normal')), 
                 textAlign = 'center', `font-family` = 'Arial') %>%
+    
+    # Make table look like this:
+    #formatStyle(names(habData1)[3:12], backgroundColor = styleEqual(10, c('gray', 'yellow')), 
+    #            textAlign = 'center', `font-family` = 'Arial') %>%
     formatStyle('TotalHabitat', backgroundColor = "lightgray")
 }
 
@@ -229,23 +233,35 @@ if("RIFFLES" %in% unique(totHab$HabParameter) | "VELOCITY" %in% unique(totHab$Ha
 }
 
 
+# How to Run Function:
+#HabitatDT(totHab)
 
-HabitatDT(totHab)
 
-
-as.POSIXct(totHab$CollDate)
 habitatplot<-function(totHab) {
-  hab<- as.Date(totHab$CollDate,format="%Y-%m-%d")
-  ggplot(hab, aes(x=CollDate , y=TotalHabitat))+
+  # force time on exact day of collection to fix POSIXct subtracting a day
+  totHab$CollDate <- as.POSIXct(paste(totHab$CollDate,' 01:00:00', sep=''),format="%Y-%m-%d %H:%M:%S", tz="US/Eastern")
+  
+  # add min and max dates to make rectagle plotting easier, starting at 6 month buffer by can play with
+  minDate <- min(totHab$CollDate) - months(6)
+  maxDate <- max(totHab$CollDate) + months(6)
+  
+  ggplot(totHab, aes(x=CollDate , y=TotalHabitat))+
+    
+    annotate("rect", xmin=minDate, xmax=maxDate, ymin=150, ymax=Inf, alpha=1, fill="#0072B2") +
+    annotate("rect",xmin=minDate, xmax=maxDate, ymin=130, ymax=150, alpha=1, fill="#009E73" ) +
+    annotate("rect",xmin=minDate, xmax=maxDate, ymin=100, ymax=130, alpha=1, fill="#F0E442") +
+    annotate("rect",xmin=minDate, xmax=maxDate, ymin=-Inf, ymax=100, alpha=1, fill="firebrick" )+
+    
     geom_col()+
-    labs(x="Collection Date", y="Total Habitat")+
+    
+    labs(x="Collection Date (Month - Year)", y="Total Habitat")+
     theme(axis.text=element_text(size=14, face="bold"), legend.text=element_text(size=14),
           legend.title = element_text(size=14, face="bold"),
           axis.title=element_text(size=14, face="bold")) +
-    scale_y_continuous(name="Total Habitat", breaks=seq(0, 200, 25),limits=c(0,200))+
-    scale_x_datetime(date_breaks='1 year')+
+    scale_y_continuous(name="Total Habitat (unitless)", breaks=seq(0, 200, 25),limits=c(0,200)) +
+    scale_x_datetime(date_breaks='1 year', date_labels =  "%b-%y")+
     theme(axis.text.x=element_text(angle=45,hjust=1))
     
 }
-
-habitatplot(totHab)
+# How to Run Function:
+#habitatplot(totHab)

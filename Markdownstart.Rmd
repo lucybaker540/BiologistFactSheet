@@ -21,7 +21,7 @@ library(scales)
 
 ```
 
-```{r read in data, message=FALSE}
+```{r read in data, message=FALSE, warning=FALSE}
 
 # Read in data and functions
 
@@ -67,7 +67,7 @@ totHab <- hab %>%
 
 
 #### Biological Assessments for the Last Two Years
-```{r table, message=FALSE}
+```{r table, message=FALSE, warning=FALSE}
 basicTable(annualdata)
 ```
 
