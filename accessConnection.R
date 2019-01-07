@@ -94,18 +94,50 @@ basicTable <- function(annualdata){
 #basicTable(annualdata)
 
 
+#Summary Table of average of Seasons
+
+SumTable<- function(annualdata){
+  SumtableData <- select(annualdata, Year, Season, IBI)%>%
+                        group_by(Season) %>% 
+                        summarise(Average = mean(IBI), `Number of samples` =n())%>%
+    mutate(Average = as.numeric(format(Average, digits=3)),
+           `Average Assessment` = VSCItester(Average))
+  total<- select(annualdata, Year, Season,IBI)%>%
+    summarise(Average=mean(IBI), `Number of samples`= n())%>%
+    mutate(Average= as.numeric(format(Average, digits=3)), 
+    `Season` ="Total Average",
+  `Average Assessment`= VSCItester(Average))%>%
+    select(Season, Average, `Number of samples`, `Average Assessment`)
+  FinalTable<-rbind(SumtableData, total)
+  
+  datatable(FinalTable, rownames=F, options = list(pageLength= nrow(FinalTable), dom = 't')) %>%
+    formatStyle(names(FinalTable), textAlign = 'center', `font-family` = 'Arial')%>%
+    formatStyle(
+      3,
+      target = "row",
+      fontWeight = styleEqual(1, "bold"))
+
+    #formatStyle( names(FinalTable [3, ]),target = 'row',
+     # backgroundColor = styleEqual( FinalTable[3, ], c('gray')))
+}
+
+
+#Example of how to run function: 
+
+#SumTable(annualdata)
+
 #Make a plot function to plot yearly VSCI scores- stole code from stressor report code, this won't plot data but I'm not sure why not! 
 
 bugplot<-function(annualdata) {
   ggplot(annualdata, aes(x=CollDate, y=IBI, fill=Season))+
   geom_col()+
   scale_fill_manual("Season", values = c("Fall" = "black", "Spring" = "dark grey"))+
-  labs(x="Collection Date", y="VSCI")+
+  labs(x="Collection Year", y="VSCI")+
   theme(axis.text=element_text(size=14, face="bold"), legend.text=element_text(size=14),
         legend.title = element_text(size=14, face="bold"),
         axis.title=element_text(size=14, face="bold")) +
   scale_y_continuous(name="VSCI", breaks=seq(0, 100, 10),limits=c(0,100))+
-  scale_x_datetime(date_breaks='1 year')+
+  scale_x_datetime(date_breaks='1 year', date_labels =  "%Y")+
   geom_hline(yintercept=60, color="red", size=1)+
   theme(axis.text.x=element_text(angle=45,hjust=1))
 
@@ -146,7 +178,10 @@ totHab <- hab %>%
 # in BenthicStressorReportTemplate_VSCI.Rmd ctrl+F habData ~line 611
 
 
+
 HabitatDT<- function(totHab){
+  brks<-seq(0,10, 1)
+  clrs<-c('grey', 'grey','grey','grey','grey','grey','grey','grey','grey','grey','grey')
 if("POOLSUB" %in% unique(totHab$HabParameter) | 'POOLVAR' %in% unique(totHab$HabParameter)){ 
   # Low Gradient Habitat Method
   totHab$CollDate <- as.Date(as.character(totHab$CollDate),format="%Y-%m-%d")
@@ -184,8 +219,9 @@ if("POOLSUB" %in% unique(totHab$HabParameter) | 'POOLVAR' %in% unique(totHab$Hab
                              'Sediment', 'Sinuosity', 'Substrate', 'Total Habitat'),
                 options=list(pageLength=nrow(habData1),dom= 'Bt' )) %>%
     formatStyle(names(habData1)[3:12], textAlign = 'center', `font-family` = 'Arial') %>%
-    formatStyle(names(habData1), fontWeight = styleInterval(10, c('bold','normal')), 
-                textAlign = 'center', `font-family` = 'Arial') %>%
+    formatStyle(names(habData1)[3:12], backgroundColor = styleEqual(brks, clrs), 
+                textAlign = 'center', `font-family` = 'Arial') %>% 
+    formatStyle(names(habData1), fontWeight = styleInterval(10, c('bold','normal')))%>% 
     
     # Make table look like this:
     #formatStyle(names(habData1)[3:12], backgroundColor = styleEqual(10, c('gray', 'yellow')), 
@@ -225,9 +261,10 @@ if("RIFFLES" %in% unique(totHab$HabParameter) | "VELOCITY" %in% unique(totHab$Ha
                                                               'Flow', 'Riffles', 'Riparian Vegetation', 
                                                               'Sediment', 'Substrate','Velocity', 'Total Habitat'),
                 options=list(pageLength=nrow(habData1),dom= 'Bt' )) %>%
-    formatStyle(names(habData1)[4:12],  textAlign = 'center', `font-family` = 'Arial') %>%
-    formatStyle(names(habData1), fontWeight = styleInterval(10, c('bold','normal')), 
-                textAlign = 'center', `font-family` = 'Arial') %>%
+    formatStyle(names(habData1),  textAlign = 'center', `font-family` = 'Arial') %>%
+    formatStyle(names(habData1)[3:12], backgroundColor = styleEqual(brks, clrs), 
+                textAlign = 'center', `font-family` = 'Arial') %>% 
+    formatStyle(names(habData1), fontWeight = styleInterval(10, c('bold','normal')))%>% 
     formatStyle('TotalHabitat', backgroundColor = "lightgray")
 }
 }
@@ -254,12 +291,12 @@ habitatplot<-function(totHab) {
     
     geom_col()+
     
-    labs(x="Collection Date (Month - Year)", y="Total Habitat")+
+    labs(x="Collection Year", y="Total Habitat")+
     theme(axis.text=element_text(size=14, face="bold"), legend.text=element_text(size=14),
           legend.title = element_text(size=14, face="bold"),
           axis.title=element_text(size=14, face="bold")) +
     scale_y_continuous(name="Total Habitat (unitless)", breaks=seq(0, 200, 25),limits=c(0,200)) +
-    scale_x_datetime(date_breaks='1 year', date_labels =  "%b-%y")+
+    scale_x_datetime(date_breaks='1 year', date_labels =  "%Y")+
     theme(axis.text.x=element_text(angle=45,hjust=1))
     
 }

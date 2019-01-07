@@ -8,7 +8,7 @@ output:
 always_allow_html: yes
 ---
 
-```{r setup, include=FALSE, message=FALSE}
+```{r setup, include=FALSE, message=FALSE, warning=FALSE}
 knitr::opts_chunk$set(echo = FALSE)
 
 library(tidyverse)
@@ -66,17 +66,30 @@ totHab <- hab %>%
 
 
 
-#### Biological Assessments for the Last Two Years
+#### Biological Assessments 
 ```{r table, message=FALSE, warning=FALSE}
 basicTable(annualdata)
 ```
 
+#### Average Seasonal Scores
+
+```{r table2, message=FALSE, warning=FALSE}
+SumTable(annualdata)
+
+
+```
+
 #### VSCI Scores
-```{r graph}
+```{r graph, message=FALSE, warning=FALSE}
 
 bugplot(annualdata)
 
 ```
+
+
+
+
+
 
 
 **Are there any seasonal differences noted?**
@@ -103,10 +116,15 @@ Biologist Enters information
 
 #### Total Habitat Scores
 
-```{r habitat table}
+```{r habitat table, message=FALSE, warning=FALSE}
 
 HabitatDT(totHab)
+
+habitatplot(totHab)
+
 ```
+
+
 
 
 **Final Assessment Rating:**
